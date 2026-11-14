@@ -1,0 +1,33 @@
+paths:
+  # Select each root explicitly through a private overlay or AF_* environment.
+  xlsx_root:
+  specification_root:
+  source_root:
+  output_root: ./output
+
+method:
+  identity: af-specification-md@394a44c2c2052ce2eeb6d28cd7647ad8a50acfcf
+
+files:
+  # Supply your own catalog explicitly; no private catalog is distributed.
+  catalog: catalog.xlsx
+  project_state: PROJECT_STATE.yml
+  catalog_role: catalog_head
+  regression_workbook: AFAO_1.0_Referenced_ADVs v1.xlsx
+  afao: AdventureFinder_Analysis_Ontology_AFAO_v1.6.1.md
+  assessment_spec: AdventureFinder_Analysis_Data_Assessment_Specification_v0.1.md
+  source_registry: source_registry.yml
+
+llm:
+  provider: openai
+  model: gpt-5.6-terra
+  reasoning_effort: high
+  max_tokens: 4096
+  ollama_base_url: http://127.0.0.1:11434
+
+source:
+  allow_full_source_fallback: false
+
+review:
+  low_confidence_threshold: 60
+  moderate_confidence_ceiling: 74
