@@ -1,0 +1,10 @@
+env:
+  BUNDLE_FROZEN: "true"
+
+steps:
+  - label: "AF scorer — offline tests"
+    key: scorer-tests
+    agents:
+      queue: act-macos
+    timeout_in_minutes: 10
+    command: bash .buildkite/scorer-tests.sh

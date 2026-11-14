@@ -1,0 +1,19 @@
+# frozen_string_literal: true
+
+require_relative "../af_scoring"
+
+require_relative "experiments/nos_two_stage/nos_two_stage"
+require_relative "experiments/nos_two_stage/nos_two_stage_identity_redaction"
+require_relative "experiments/phase6/phase6_social_interaction_guardrail"
+require_relative "experiments/phase6/phase6_investigation_emphasis_guardrail"
+require_relative "experiments/phase6/phase6_lethality_failure_severity_guardrail"
+require_relative "experiments/phase6/phase6_puzzle_problem_solving_emphasis_guardrail"
+require_relative "experiments/phase6/phase6_seriousness_guardrail"
+require_relative "experiments/nos_two_stage/nos_two_stage_runner"
+require_relative "experiments/nos_two_stage/nos_two_stage_source_boundary"
+require_relative "experiments/nos_two_stage/nos_two_stage_runner_factory"
+require_relative "experiments/phase6/phase6_social_interaction_runner_metadata"
+require_relative "experiments/phase6/phase6_investigation_emphasis_runner_metadata"
+require_relative "experiments/phase6/phase6_lethality_failure_severity_runner_metadata"
+require_relative "experiments/phase6/phase6_puzzle_problem_solving_emphasis_runner_metadata"
+require_relative "experiments/phase6/phase6_seriousness_runner_metadata"
