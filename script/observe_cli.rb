@@ -52,11 +52,16 @@ end
 
 at_exit do
   features = $LOADED_FEATURES.select { |path| path.include?("/af_scoring") }
+  owner_features = $LOADED_FEATURES.grep(%r{/af_source_md(?:/|\.rb)})
+  owner_root = ENV["AF_SOURCE_MD_ROOT"] || (defined?(AFSourceMD::ROOT) && AFSourceMD::ROOT)
   unexpected = features.reject { |path| path.start_with?(OfflineObservation::ROOT + "/lib/") }
+  unexpected.concat(owner_features.reject { |path| owner_root && path.start_with?(owner_root + "/lib/") })
   receipt = {
-    "scope" => "Ruby File operations after observer load; loaded scorer feature identities; audited unzip subprocess",
+    "scope" => "Ruby File operations after observer load; loaded scorer/owner feature identities; audited unzip subprocess",
     "counters" => OfflineObservation::COUNTERS, "reads" => OfflineObservation::READS.uniq.sort,
-    "loaded" => features.to_h { |path| [path, Digest::SHA256.file(path).hexdigest] }, "unexpected_loaded" => unexpected
+    "loaded" => features.to_h { |path| [path, Digest::SHA256.file(path).hexdigest] },
+    "loaded_owner" => owner_features.to_h { |path| [path, Digest::SHA256.file(path).hexdigest] },
+    "unexpected_loaded" => unexpected
   }
   File.write(ENV.fetch("AF_SMOKE_RECEIPT"), JSON.pretty_generate(receipt) + "\n")
   abort "Unexpected scorer load path" unless unexpected.empty?
