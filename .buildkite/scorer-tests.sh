@@ -20,7 +20,7 @@ git -C "$job_root/af-specification-md" checkout -q --detach FETCH_HEAD
 test "$(git -C "$job_root/af-specification-md" rev-parse HEAD)" = "$spec_commit"
 test -r "$job_root/af-specification-md/documents.json"
 
-owner_commit=58172a215669c8f7e62d78aa7d7e082b04379d80
+owner_commit=3611758b7dadfb88f46d011aa3b35c3dda575c62
 git init -q "$job_root/af-source-md"
 git -C "$job_root/af-source-md" fetch -q --depth=1 https://github.com/dtnorris/af-source-md.git "$owner_commit"
 git -C "$job_root/af-source-md" checkout -q --detach FETCH_HEAD
