@@ -29,6 +29,7 @@ module OfflineSmoke
       "AF_XLSX_ROOT" => evidence, "AF_SOURCE_ROOT" => evidence, "AF_SPEC_ROOT" => spec,
       "AF_OUTPUT_DIR" => File.join(evidence, "output")
     }
+    environment["AF_SOURCE_MD_ROOT"] = ENV.fetch("AF_SOURCE_MD_ROOT") if ENV.key?("AF_SOURCE_MD_ROOT")
     command = [RbConfig.ruby, "-rbundler/setup", "-I", File.join(root, "lib"),
                "-r", File.join(root, "script/observe_cli.rb"), File.join(root, "bin/af-score"), *arguments]
     stdout, stderr, status = Open3.capture3(environment, *command, chdir: evidence, unsetenv_others: true, binmode: true)

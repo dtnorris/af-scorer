@@ -88,6 +88,18 @@ audited separately. Run evidence should retain that observation limit.
 
 ## Explicit user inputs and configuration
 
+Source registry resolution and raw page slicing now delegate to the standalone
+`af-source-md` API `af-source-md/v0.1`, requiring Ruby 3.2+. Select the exact
+reviewed owner tree with absolute `AF_SOURCE_MD_ROOT`, or supply `af_source_md`
+on Ruby's load path when the variable is absent. Explicit missing, blank,
+invalid or unsupported selection refuses without an ambient/historical fallback;
+keep selection fixed for the process. The scorer adapter preserves its public
+Resolution/Extraction types and error classes, lazy mapping checks, warnings,
+source policy, Levels-context heuristics and complete prepared-source v0.2
+replay. MD owns marker inventory and byte reads; scorer retains permission for
+clamp/full-source scope and context selection. Selecting this candidate does not
+requalify a frozen method or rewrite historical v0.1 artifacts.
+
 `config/default.yml` is a template: its three input roots are deliberately unset.
 Select all roots explicitly; there is no private sibling default. For example,
 with your own catalog, source registry and content, and the exact method above:

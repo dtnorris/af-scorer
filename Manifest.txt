@@ -58,6 +58,7 @@ lib/af_scoring/schema_builder.rb
 lib/af_scoring/scoring_target.rb
 lib/af_scoring/selected_method.rb
 lib/af_scoring/source_document.rb
+lib/af_scoring/source_markdown_owner.rb
 lib/af_scoring/source_resolver.rb
 lib/af_scoring/tactical_complexity_morphology_equivalence_guardrail.rb
 lib/af_scoring/target_eligibility.rb
@@ -106,6 +107,7 @@ test/rules_system_mastery_demand_baseline_test.rb
 test/runner_test.rb
 test/scoring_target_test.rb
 test/source_document_test.rb
+test/source_owner_test.rb
 test/source_package_test.rb
 test/source_resolver_test.rb
 test/source_test.rb
