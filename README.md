@@ -113,8 +113,11 @@ bin/af-score --prepare-source /absolute/private/prepared.json ADV-0001
 bin/af-score --preflight --prepared-source /absolute/private/prepared.json --render-preflight /absolute/private/preflight.json ADV-0001
 ```
 
-These paths are examples requiring explicit user choices. The catalog defaults
-to `catalog.xlsx`; override `AF_CATALOG_WORKBOOK` if needed. The catalog requires
+These paths are examples requiring explicit user choices. Set
+`AF_CATALOG_WORKBOOK` or `files.catalog` to select a workbook directly. Otherwise
+the scorer validates all three bindings and version ceilings in `PROJECT_STATE.yml`
+and selects `catalog_head` by default. Use `AF_CATALOG_ROLE` to select another
+role or `AF_PROJECT_STATE` to locate a different manifest. Catalog workbooks require
 Adventure ID, Adventure Title, Page Count, Source Book, Book Publisher, Start Page
 and End Page fields. The source registry is `source_registry.yml` under the
 selected source root, using `adventurefinder-source-registry/v0.1`; registry
