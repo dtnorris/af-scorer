@@ -77,6 +77,8 @@ module AFScoring
 
     private
 
+    # Resolve a named role from the manifest directory after verifying every
+    # v0.2 binding. Invalid project state raises ConfigurationError.
     def resolve_project_state_catalog(role)
       role = role.to_s.strip
       unless PROJECT_STATE_ROLES.include?(role)
@@ -84,30 +86,48 @@ module AFScoring
               "Unsupported catalog role #{role.inspect}; expected one of #{PROJECT_STATE_ROLES.join(', ')}"
       end
 
-      state = load_yaml(project_state_path)
-      unless state["schema_version"] == PROJECT_STATE_SCHEMA
-        raise ConfigurationError,
-              "Unsupported project-state schema #{state['schema_version'].inspect}; expected #{PROJECT_STATE_SCHEMA}"
+      manifest = project_state_path
+      state = YAML.safe_load_file(manifest, aliases: false)
+      unless state.is_a?(Hash) && state["schema_version"] == PROJECT_STATE_SCHEMA
+        raise ConfigurationError, "Expected a #{PROJECT_STATE_SCHEMA} mapping in #{manifest}"
       end
+      unknown = state.keys - ["schema_version", *PROJECT_STATE_ROLES]
+      raise ConfigurationError, "Unknown project-state keys: #{unknown.join(', ')}" unless unknown.empty?
 
-      entry = state[role]
-      raise ConfigurationError, "Project state is missing role #{role}" unless entry.is_a?(Hash)
+      paths = PROJECT_STATE_ROLES.to_h do |name|
+        [name, validate_project_state_role(manifest, name, state[name])]
+      end
+      head = Gem::Version.new(state.fetch("catalog_head").fetch("version").to_s)
+      (PROJECT_STATE_ROLES - ["catalog_head"]).each do |name|
+        version = state.fetch(name).fetch("version").to_s
+        if Gem::Version.new(version) > head
+          raise ConfigurationError, "#{name} #{version} cannot be newer than catalog_head #{head}"
+        end
+      end
+      paths.fetch(role)
+    rescue Psych::Exception, SystemCallError => error
+      raise ConfigurationError, "Invalid project state #{manifest}: #{error.message}"
+    end
 
-      version = entry["version"].to_s.strip
-      filename = entry["filename"].to_s.strip
-      expected_sha = entry["sha256"].to_s.strip.downcase
-      expected_bytes = entry["bytes"]
-      if version.empty? || filename.empty? || expected_sha !~ /\A[0-9a-f]{64}\z/ || !expected_bytes.is_a?(Integer) || expected_bytes <= 0
+    # Verify an exact version, canonical basename, size and SHA-256 against
+    # the manifest directory. Returns the path or raises ConfigurationError.
+    def validate_project_state_role(manifest, role, entry)
+      fields = %w[version filename sha256 bytes]
+      unless entry.is_a?(Hash) && entry.keys.size == fields.size && fields.all? { |field| entry.key?(field) }
+        raise ConfigurationError, "Invalid project-state fields for #{role}"
+      end
+      version = entry.fetch("version").to_s
+      filename = entry.fetch("filename")
+      expected_sha = entry.fetch("sha256")
+      expected_bytes = entry.fetch("bytes")
+      unless version.match?(/\A\d+(?:\.\d+)*\z/) &&
+             filename == "5e_Adventure_Master_Catalog_#{version}.xlsx" &&
+             expected_sha.is_a?(String) && expected_sha.match?(/\A[0-9a-f]{64}\z/) &&
+             expected_bytes.is_a?(Integer) && expected_bytes.positive?
         raise ConfigurationError, "Invalid project-state entry for #{role}"
       end
 
-      expected_filename = "5e_Adventure_Master_Catalog_#{version}.xlsx"
-      unless filename == expected_filename && File.basename(filename) == filename
-        raise ConfigurationError,
-              "Invalid project-state filename for #{role}: #{filename.inspect}; expected #{expected_filename.inspect}"
-      end
-
-      path = resolve_under(dig("paths", "xlsx_root"), filename)
+      path = File.join(File.dirname(manifest), filename)
       raise ConfigurationError, "Missing #{role} catalog workbook: #{path}" unless File.file?(path)
       actual_bytes = File.size(path)
       unless actual_bytes == expected_bytes

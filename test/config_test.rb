@@ -83,6 +83,35 @@ class ConfigTest < Minitest::Test
     end
   end
 
+  # Role lookup follows the selected manifest and validates even an unused role.
+  def test_catalog_resolves_next_to_manifest_and_rejects_changed_nonselected_role
+    Dir.mktmpdir do |dir|
+      write_project_state_config(dir)
+      selected = File.join(dir, "selected")
+      head = write_catalog(selected, "2.0", "head")
+      baseline = write_catalog(selected, "1.0", "base")
+      manifest = File.join(selected, "PROJECT_STATE.yml")
+      write_project_state(selected, catalog_head: ["2.0", head])
+      state = YAML.safe_load_file(manifest)
+      state["matcher_authorized_baseline"] = project_state_entry("1.0", baseline)
+      File.write(manifest, state.to_yaml)
+      config = AFScoring::Config.new(project_root: dir, overrides: {"files" => {"project_state" => manifest}})
+
+      assert_equal head, config.catalog_path
+      File.binwrite(baseline, "edit")
+      error = assert_raises(AFScoring::ConfigurationError) { config.catalog_path }
+      assert_match(/matcher_authorized_baseline catalog SHA-256 mismatch/, error.message)
+
+      File.binwrite(baseline, "base")
+      assert_equal head, config.catalog_path
+      newer = write_catalog(selected, "3.0", "newer")
+      state["production_dependency_floor"] = project_state_entry("3.0", newer)
+      File.write(manifest, state.to_yaml)
+      error = assert_raises(AFScoring::ConfigurationError) { config.catalog_path }
+      assert_match(/production_dependency_floor .* cannot be newer than catalog_head/, error.message)
+    end
+  end
+
   def test_ollama_base_url_can_be_overridden_by_environment
     previous = ENV["AF_OLLAMA_BASE_URL"]
     ENV["AF_OLLAMA_BASE_URL"] = "http://localhost:9999"

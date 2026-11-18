@@ -9,8 +9,8 @@ method:
   identity: af-specification-md@394a44c2c2052ce2eeb6d28cd7647ad8a50acfcf
 
 files:
-  # Supply your own catalog explicitly; no private catalog is distributed.
-  catalog: catalog.xlsx
+  # An explicit workbook overrides the configured project-state role.
+  catalog:
   project_state: PROJECT_STATE.yml
   catalog_role: catalog_head
   regression_workbook: AFAO_1.0_Referenced_ADVs v1.xlsx
